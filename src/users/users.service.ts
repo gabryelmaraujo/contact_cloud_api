@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
@@ -7,7 +7,11 @@ import { UsersRepository } from './repositories/users.repository';
 @Injectable()
 export class UsersService {
   constructor(private usersRepository: UsersRepository){}
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
+    const verifyUserExists = await this.usersRepository.findByEmail(createUserDto.email)
+
+    if(verifyUserExists) throw new ConflictException('This user already exists.')
+
     return this.usersRepository.create(createUserDto);
   }
 
@@ -15,10 +19,16 @@ export class UsersService {
     return this.usersRepository.findAll();
   }
 
+  async findByEmail(email: string){
+    const user = await this.usersRepository.findByEmail(email)
+    if(!user) throw new NotFoundException('User not found.')
+    return user
+  };
+
   findOne(id: number) {
     const findUser = this.usersRepository.findOne(id);
     if(!findUser){
-      throw new NotFoundException('user not found');
+      throw new NotFoundException('User not found.');
     }
     return findUser;
   }
@@ -26,7 +36,7 @@ export class UsersService {
   update(id: number, updateUserDto: UpdateUserDto) {
     const findUser = this.usersRepository.findOne(id);
     if(!findUser){
-      throw new NotFoundException('user not found');
+      throw new NotFoundException('User not found.');
     }
     return this.usersRepository.update(id, updateUserDto)
   }
@@ -34,7 +44,7 @@ export class UsersService {
   remove(id: number) {
     const findUser = this.usersRepository.findOne(id);
     if(!findUser){
-      throw new NotFoundException('user not found');
+      throw new NotFoundException('User not found.');
     }
     return this.usersRepository.delete(id)
   }
