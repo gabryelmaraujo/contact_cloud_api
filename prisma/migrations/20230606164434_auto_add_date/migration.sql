@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "contacts" ALTER COLUMN "created_at" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "register_date" SET DEFAULT CURRENT_TIMESTAMP;
